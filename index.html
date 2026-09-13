@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>patch lab mx ★ | @patch.labmx</title>
+  <title>patch lab mx ★ | @patc.hlabmx</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- SDK Oficial de Mercado Pago -->
   <script src="https://sdk.mercadopago.com/js/v2"></script>
@@ -62,7 +62,7 @@
   <header class="bg-[#423A33] border-b border-black px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-md">
     <div>
       <h1 class="text-xl font-bold tracking-tight leading-none text-[#F2EDE4]">patch lab mx ★</h1>
-      <span class="text-xs font-semibold text-[#C9614F]">@patch.labmx</span>
+      <span class="text-xs font-semibold text-[#C9614F]">@patc.hlabmx</span>
     </div>
     <div class="text-sm font-semibold text-[#F2EDE4]" id="total-price-header">
       Total: $250 MXN
@@ -381,7 +381,7 @@
                     const address = getFullAddress() || "Entrega local";
                     const orderData = getOrderData('PayPal', address);
                     const message = `¡Hola patch lab mx ★! 👋 Acabo de pagar por PayPal:\n\n✉️ *Correo:* ${orderData.email}\n🧢 *Gorra:* ${orderData.color_gorra}\n📍 *Parches:* ${orderData.parches}\n🚚 *Entrega:* ${orderData.entrega}\n💰 *Total:* ${orderData.total}\n\nAdjunto screenshot de mi diseño.`;
-                    window.open(`https://ig.me/m/patch.labmx?text=${encodeURIComponent(message)}`, '_blank');
+                    window.open(`https://ig.me/m/patc.hlabmx?text=${encodeURIComponent(message)}`, '_blank');
                     closeCheckoutModal();
                 });
             },
@@ -402,7 +402,7 @@
         try { await fetch(formspreeEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(data) }); } catch (e) { console.error('Error mail SPEI:', e); }
         document.getElementById('loading-overlay').classList.add('hidden');
         const message = `¡Hola patch lab mx ★! 👋 Confirmo pedido SPEI:\n\n✉️ *Correo:* ${data.email}\n🧢 *Gorra:* ${data.color_gorra}\n📍 *Parches:* ${data.parches}\n🚚 *Entrega:* ${data.entrega}\n💰 *Total:* ${data.total}\n\n---------------------------\nAdjunto comprobante Santander y screenshot del diseño.`;
-        window.open(`https://ig.me/m/patch.labmx?text=${encodeURIComponent(message)}`, '_blank');
+        window.open(`https://ig.me/m/patc.hlabmx?text=${encodeURIComponent(message)}`, '_blank');
         closeCheckoutModal();
     }
 
