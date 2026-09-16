@@ -9,6 +9,13 @@
   <script src="https://sdk.mercadopago.com/js/v2"></script>
   <!-- SDK Oficial de PayPal -->
   <script src="https://www.paypal.com/sdk/js?client-id=BAALtpJBcmbmL5op3z3KiqvHdh6Q6DLCCG5lt3EN6RuJcnF7LmuSf8rurduAfu5kzd0-s2Xx3giJfW9CCA&currency=MXN"></script>
+  <!-- SDK Oficial de EmailJS -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script type="text/javascript">
+     (function(){
+        emailjs.init("dvvfJ720byW1NTSi4");
+     })();
+  </script>
   <style>
     :root {
       --color-terracota: #C9614F;
@@ -252,7 +259,6 @@
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwryFAUebP9DpcYEW3kDA1Ljx0QZdatiqFISSPfEUuJUqFWXfNBH7A0HEJMD78TiEmMtg/exec";
-    const FORMSPREE_ENDPOINT = "https://formspree.io/f/TU_FORM_ID_AQUI"; // REEMPLAZA CON TU ENDPOINT REAL DE FORMSPREE
     const mp = new MercadoPago('APP_USR-f346a066-5e0f-4886-9041-998816f1837e', { locale: 'es-MX' });
     const BASE_PRICE = 250; const CDMX_SHIPPING_FEE = 120; const DIGITAL_FEE_RATE = 0.04;
     let currentColor = 'navy'; let currentViewIndex = 0; let selectedPatch = null; let placedPatches = {}; let currentGrandTotalMXN = 0; let customerEmail = '';
@@ -348,9 +354,9 @@
         document.getElementById('checkout-total').innerText = `$${currentGrandTotalMXN.toFixed(2)}`; 
     }
 
-    // --- NOTIFICACIONES ACTUALIZADAS (Google Sheets + Formspree) ---
+    // --- NOTIFICACIONES CONFIGURADAS (Google Sheets + EmailJS) ---
     async function enviarNotificaciones(orderData) {
-        // 1. Envío a Google Sheets (usando URLSearchParams para compatibilidad CORS)
+        // 1. Envío a Google Sheets (Formato URLSearchParams para compatibilidad CORS)
         try {
             const formData = new URLSearchParams();
             formData.append('postData', JSON.stringify(orderData));
@@ -365,23 +371,27 @@
             console.error("Error al enviar a Google Sheets:", e); 
         }
 
-        // 2. Envío a Formspree (Correo)
+        // 2. Envío de Correo vía EmailJS
         try {
-            if (!FORMSPREE_ENDPOINT.includes('TU_FORM_ID_AQUI')) {
-                await fetch(FORMSPREE_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify(orderData)
-                });
-            }
+            const templateParams = {
+                reply_to: orderData.email,
+                metodo_pago: orderData.metodo_pago,
+                color_gorra: orderData.color_gorra,
+                parches: orderData.parches,
+                entrega: orderData.entrega,
+                total: orderData.total
+            };
+
+            await emailjs.send('service_y9rnzpe', 'template_ecmzkr8', templateParams);
+            console.log("Correo enviado exitosamente vía EmailJS");
         } catch (e) { 
-            console.error("Error al enviar a Formspree:", e); 
+            console.error("Error al enviar correo con EmailJS:", e); 
         }
     }
 
     // --- PROCESOS DE PAGO ---
 
-    // 1. Mercado Pago (Guarda orden temporalmente en el navegador y redirige)
+    // 1. Mercado Pago
     function processMercadoPago() {
         const address = getFullAddress(); 
         if (!address) return;
@@ -393,7 +403,7 @@
         window.location.href = "https://www.mercadopago.com.mx/"; 
     }
 
-    // 2. PayPal (Envía correos/Sheets tras ser aprobado el cobro)
+    // 2. PayPal
     function renderPayPalButtons() {
         if (typeof paypal === 'undefined') return;
         paypalRendered = true;
@@ -437,7 +447,7 @@
         }).render('#paypal-button-container');
     }
 
-    // 3. SPEI (Envía correos/Sheets directo al confirmar)
+    // 3. SPEI
     async function processSPEI() {
         const address = getFullAddress(); if (!address) return;
         document.getElementById('loading-text').innerText = 'Registrando pedido y enviando correo...';
