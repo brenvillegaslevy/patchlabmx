@@ -70,7 +70,7 @@
   <!-- CONTENEDOR PRINCIPAL -->
   <main class="flex-1 max-w-5xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
 
-    <!-- ÁREA DE VISUALIZACIÓN -->
+    <!-- ÁREA DE VISUALIZACIÓN INTERACTIVA -->
     <section class="md:col-span-2 bg-white/90 rounded-3xl p-6 border-2 border-[#C9614F]/40 flex flex-col items-center justify-between relative min-h-[480px] shadow-sm">
       <div class="w-full flex items-center justify-between z-10">
         <span id="view-label" class="text-xs font-bold tracking-wider text-neutral-400 uppercase">
@@ -315,7 +315,7 @@
 
     function goToPreviewStep() { const emailInput = document.getElementById('customer-email'); if (!emailInput.checkValidity() || emailInput.value === '') { alert('Ingresa un correo válido.'); return; } customerEmail = emailInput.value; document.getElementById('modal-step-email').classList.add('hidden'); document.getElementById('modal-step-preview').classList.remove('hidden'); document.getElementById('modal-title').innerText = "Vista Final de tu Gorra"; document.getElementById('modal-subtitle').innerText = "Verifica tu diseño y tómale screenshot"; const grid = document.getElementById('modal-views-grid'); const count = Object.keys(placedPatches).length; document.getElementById('modal-preview-subtotal').innerText = `$${calculateTotalPrice(count)} MXN`; grid.innerHTML = ''; VIEWS.forEach(view => { const currentViewPatches = view.zones.filter(z => placedPatches[z.id]); let patchesHTML = ''; currentViewPatches.forEach(z => { const p = placedPatches[z.id]; patchesHTML += `<img src="${p.img}" alt="${p.name}" class="absolute w-12 h-12 object-contain drop-shadow-md" style="top:${z.top}; left:${z.left}; transform: translate(-50%, -50%);" onError="handleImgError(this)" />`; }); const card = document.createElement('div'); card.className = 'bg-neutral-50 rounded-2xl p-4 border border-neutral-200 flex flex-col items-center relative overflow-hidden'; card.innerHTML = `<span class="text-[11px] font-bold text-neutral-400 uppercase self-start mb-2">${view.name}</span><div class="relative w-64 h-64 flex items-center justify-center scale-110 transform transition-transform select-none"><img src="assets/${currentColor}-${view.angle}.PNG" class="w-full h-full object-contain drop-shadow-lg" onError="handleImgError(this)" />${patchesHTML}</div>`; grid.appendChild(card); }); }
     function goToPaymentStep() { document.getElementById('modal-step-preview').classList.add('hidden'); document.getElementById('modal-step-payment').classList.remove('hidden'); document.getElementById('modal-title').innerText = "Entrega y Pago"; calculateCheckoutTotals(); }
-    function backToPreviewStep() { document.getElementById('modal-step-[#modal-step-payment]').classList.add('hidden'); document.getElementById('modal-step-preview').classList.remove('hidden'); document.getElementById('modal-title').innerText = "Vista Final"; }
+    function backToPreviewStep() { document.getElementById('modal-step-payment').classList.add('hidden'); document.getElementById('modal-step-preview').classList.remove('hidden'); document.getElementById('modal-title').innerText = "Vista Final"; }
     function toggleDeliveryMethod() { document.getElementById('shipping-address-box').classList.toggle('hidden', document.querySelector('input[name="delivery-method"]:checked').value !== 'shipping'); calculateCheckoutTotals(); }
     
     function togglePaymentMethod() {
@@ -348,29 +348,40 @@
         document.getElementById('checkout-total').innerText = `$${currentGrandTotalMXN.toFixed(2)}`; 
     }
 
-    // --- NOTIFICACIONES PARA PAYPAL Y SPEI ---
+    // --- NOTIFICACIONES ACTUALIZADAS (Google Sheets + Formspree) ---
     async function enviarNotificaciones(orderData) {
+        // 1. Envío a Google Sheets (usando URLSearchParams para compatibilidad CORS)
         try {
+            const formData = new URLSearchParams();
+            formData.append('postData', JSON.stringify(orderData));
+
             await fetch(SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(orderData)
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString()
             });
-        } catch (e) { console.error("Error Sheets:", e); }
+        } catch (e) { 
+            console.error("Error al enviar a Google Sheets:", e); 
+        }
 
+        // 2. Envío a Formspree (Correo)
         try {
-            await fetch(FORMSPREE_ENDPOINT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify(orderData)
-            });
-        } catch (e) { console.error("Error Formspree:", e); }
+            if (!FORMSPREE_ENDPOINT.includes('TU_FORM_ID_AQUI')) {
+                await fetch(FORMSPREE_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+            }
+        } catch (e) { 
+            console.error("Error al enviar a Formspree:", e); 
+        }
     }
 
     // --- PROCESOS DE PAGO ---
 
-    // 1. Mercado Pago (Guarda orden en localStorage y redirige a la pasarela)
+    // 1. Mercado Pago (Guarda orden temporalmente en el navegador y redirige)
     function processMercadoPago() {
         const address = getFullAddress(); 
         if (!address) return;
@@ -382,7 +393,7 @@
         window.location.href = "https://www.mercadopago.com.mx/"; 
     }
 
-    // 2. PayPal (Envia correos/Sheets solo tras ser aprobado el cobro)
+    // 2. PayPal (Envía correos/Sheets tras ser aprobado el cobro)
     function renderPayPalButtons() {
         if (typeof paypal === 'undefined') return;
         paypalRendered = true;
@@ -426,7 +437,7 @@
         }).render('#paypal-button-container');
     }
 
-    // 3. SPEI (Envia correos/Sheets directo al confirmar)
+    // 3. SPEI (Envía correos/Sheets directo al confirmar)
     async function processSPEI() {
         const address = getFullAddress(); if (!address) return;
         document.getElementById('loading-text').innerText = 'Registrando pedido y enviando correo...';
