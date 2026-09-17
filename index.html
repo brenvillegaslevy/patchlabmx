@@ -1,494 +1,535 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>patch lab mx ★ | @patc.hlabmx</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>patch lab mx ★ | Visualizador de Gorras Personalizadas</title>
+  
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- SDK Oficial de Mercado Pago -->
-  <script src="https://sdk.mercadopago.com/js/v2"></script>
-  <!-- SDK Oficial de PayPal -->
-  <script src="https://www.paypal.com/sdk/js?client-id=BAALtpJBcmbmL5op3z3KiqvHdh6Q6DLCCG5lt3EN6RuJcnF7LmuSf8rurduAfu5kzd0-s2Xx3giJfW9CCA&currency=MXN"></script>
-  <!-- SDK Oficial de EmailJS -->
+  <!-- EmailJS SDK -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  <script type="text/javascript">
-     (function(){
-        emailjs.init("dvvfJ720byW1NTSi4");
-     })();
-  </script>
+  
+  <!-- Tipografía Google Fonts (Bricolage Grotesque & Work Sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
-    :root {
-      --color-terracota: #C9614F;
-      --color-petroleo: #007780;
-      --color-magenta: #CF6F92;
-      --color-tinta: #423A33;
-      --color-crema: #F2EDE4;
+    body {
+      font-family: 'Work Sans', sans-serif;
+      background-color: #0d0d0d;
+      color: #f5f0eb;
+    }
+    h1, h2, h3, .font-brand {
+      font-family: 'Bricolage Grotesque', sans-serif;
+    }
+    
+    /* Colores de Marca */
+    .bg-crema { background-color: #f5f0eb; }
+    .text-crema { color: #f5f0eb; }
+    .bg-petroleo { background-color: #1a2a3a; }
+    .text-petroleo { color: #1a2a3a; }
+    .bg-terracota { background-color: #d96b43; }
+    .hover\:bg-terracota-dark:hover { background-color: #b85430; }
+    .bg-tinta { background-color: #121212; }
+
+    /* Canvas del Visualizador */
+    .cap-container {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      aspect-ratio: 1/1;
+      background-color: #ffffff;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+    }
+    .cap-bg {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    
+    /* Zonas de Parches en la Gorra */
+    .patch-slot {
+      position: absolute;
+      border: 2px dashed rgba(217, 107, 67, 0.4);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+    .patch-slot:hover {
+      border-color: #d96b43;
+      background-color: rgba(217, 107, 67, 0.2);
+    }
+    .patch-slot.active {
+      border-color: #d96b43;
+      border-style: solid;
+      background-color: transparent;
+    }
+    .patch-slot img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+    }
+    .slot-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #1a2a3a;
+      background-color: rgba(245, 240, 235, 0.85);
+      padding: 2px 6px;
+      border-radius: 4px;
+      pointer-events: none;
     }
 
-    * {
-      scrollbar-width: thin;
-      scrollbar-color: var(--color-petroleo) var(--color-crema);
-    }
+    /* Coordenadas específicas para las posiciones de los parches */
+    #slot-F1 { top: 32%; left: 22%; width: 22%; height: 22%; }
+    #slot-F2 { top: 28%; left: 39%; width: 22%; height: 22%; }
+    #slot-F3 { top: 32%; left: 56%; width: 22%; height: 22%; }
+    #slot-F4 { top: 38%; left: 71%; width: 18%; height: 18%; }
+    #slot-L1 { top: 52%; left: 16%; width: 18%; height: 18%; }
 
+    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
     }
     ::-webkit-scrollbar-track {
-      background: var(--color-crema);
+      background: #121212;
     }
     ::-webkit-scrollbar-thumb {
-      background-color: var(--color-petroleo);
-      border-radius: 6px;
-      border: 2px solid var(--color-crema);
+      background: #2a2a2a;
+      border-radius: 4px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background-color: var(--color-terracota);
+      background: #d96b43;
     }
-
-    body { background-color: var(--color-crema); color: var(--color-tinta); }
-
-    .zone-btn { position: absolute; transform: translate(-50%, -50%); width: 42px; height: 42px; border-radius: 12px; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; z-index: 10; border: 2px dashed color-mix(in srgb, var(--color-petroleo) 40%, transparent); }
-    .zone-btn.occupied { z-index: 30; border: none; }
-
-    .btn-action-primary { background-color: var(--color-terracota); color: white; transition: background-color 0.2s; }
-    .btn-action-primary:hover { background-color: color-mix(in srgb, var(--color-terracota) 80%, black); }
-
-    .btn-action-magenta { background-color: var(--color-magenta); color: white; transition: background-color 0.2s; }
-    .btn-action-magenta:hover { background-color: color-mix(in srgb, var(--color-magenta) 80%, black); }
-
-    .btn-action-spei { background-color: var(--color-petroleo); color: white; transition: background-color 0.2s; }
-    .btn-action-spei:hover { background-color: color-mix(in srgb, var(--color-petroleo) 80%, black); }
   </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans overflow-y-auto">
+<body class="bg-tinta text-crema min-h-screen pb-12">
 
-  <!-- ENCABEZADO -->
-  <header class="bg-[#423A33] border-b border-black px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-md">
-    <div>
-      <h1 class="text-xl font-bold tracking-tight leading-none text-[#F2EDE4]">patch lab mx ★</h1>
-      <span class="text-xs font-semibold text-[#C9614F]">@patc.hlabmx</span>
-    </div>
-    <div class="text-sm font-semibold text-[#F2EDE4]" id="total-price-header">
-      Total: $250 MXN
+  <!-- ENCABEZADO / NAVBAR -->
+  <header class="border-b border-neutral-800 bg-black/60 sticky top-0 z-50 backdrop-blur-md">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <h1 class="text-2xl font-extrabold tracking-tight text-crema">patch lab mx ★</h1>
+        <span class="text-xs bg-terracota text-white px-2 py-0.5 rounded-full font-medium">@patc.hlabmx</span>
+      </div>
+      <div id="top-total-badge" class="text-sm font-semibold bg-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-700">
+        Total: <span class="text-terracota font-bold">$250 MXN</span>
+      </div>
     </div>
   </header>
 
-  <!-- CONTENEDOR PRINCIPAL -->
-  <main class="flex-1 max-w-5xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="max-w-6xl mx-auto px-4 pt-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-    <!-- ÁREA DE VISUALIZACIÓN INTERACTIVA -->
-    <section class="md:col-span-2 bg-white/90 rounded-3xl p-6 border-2 border-[#C9614F]/40 flex flex-col items-center justify-between relative min-h-[480px] shadow-sm">
-      <div class="w-full flex items-center justify-between z-10">
-        <span id="view-label" class="text-xs font-bold tracking-wider text-neutral-400 uppercase">
-          VISTA: FRENTE
-        </span>
-        <div class="flex gap-2">
-          <button onclick="prevView()" class="px-3 py-1 bg-[#F2EDE4] hover:bg-[#C9614F]/10 rounded-full text-xs font-medium transition-colors text-[#423A33]">
-            &larr; Anterior
-          </button>
-          <button onclick="nextView()" class="px-3 py-1 bg-[#F2EDE4] hover:bg-[#C9614F]/10 rounded-full text-xs font-medium transition-colors text-[#423A33]">
-            Siguiente &rarr;
-          </button>
-        </div>
-      </div>
+      <!-- COLUMNA IZQUIERDA: VISUALIZADOR DE GORRA (LG: 7 cols) -->
+      <div class="lg:col-span-7 flex flex-col items-center">
+        
+        <!-- CANVAS DE LA GORRA -->
+        <div class="cap-container mb-6">
+          <img id="cap-image" class="cap-bg" src="https://raw.githubusercontent.com/brenvillegaslevy/patchlab/main/assets/caps/moss.png" alt="Gorra Base Patch Lab">
 
-      <div class="relative w-80 h-80 my-2 flex items-center justify-center select-none">
-        <img id="cap-image" src="assets/navy-front.PNG" alt="Gorra patch lab mx ★" class="w-full h-full object-contain drop-shadow-lg transition-all duration-300" onError="handleImgError(this)" />
-        <div id="zones-overlay" class="absolute inset-0 pointer-events-auto"></div>
-      </div>
-
-      <div class="flex flex-col items-center gap-2 w-full z-10">
-        <span class="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">Color de Gorra</span>
-        <div class="flex gap-3">
-          <button onclick="setColor('Navy')" id="btn-navy" class="flex items-center gap-2 px-4 py-2 bg-black text-white text-xs font-semibold rounded-xl ring-2 ring-black ring-offset-2 transition-all">
-            <span class="w-3 h-3 rounded-full bg-blue-900 border border-white"></span>Navy</button>
-          <button onclick="setColor('Dune')" id="btn-dune" class="flex items-center gap-2 px-4 py-2 bg-[#F2EDE4] text-black text-xs font-semibold rounded-xl hover:bg-[#C9614F]/10 transition-all border border-neutral-300">
-            <span class="w-3 h-3 rounded-full bg-[#c2b280] border border-neutral-400"></span>Dune</button>
-          <button onclick="setColor('Moss')" id="btn-moss" class="flex items-center gap-2 px-4 py-2 bg-[#F2EDE4] text-black text-xs font-semibold rounded-xl hover:bg-[#C9614F]/10 transition-all border border-neutral-300">
-            <span class="w-3 h-3 rounded-full bg-[#4a5d4e] border border-neutral-400"></span>Moss</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- PANEL LATERAL DE RESUMEN -->
-    <section class="bg-white/90 rounded-3xl p-6 border-2 border-[#C9614F]/40 flex flex-col justify-between shadow-sm">
-      <div>
-        <h2 class="text-lg font-bold mb-4 border-b border-neutral-200 pb-2 text-[#423A33]">Resumen de Personalización</h2>
-        <div class="space-y-3 text-sm">
-          <div class="flex justify-between text-neutral-600"><span>Color seleccionado:</span><span id="summary-color" class="font-semibold text-black uppercase">Navy</span></div>
-          <div class="flex justify-between text-neutral-600"><span>Precio Gorra Base:</span><span id="summary-base-price" class="font-mono text-black">$250 MXN</span></div>
-          <div class="pt-3 border-t border-neutral-100">
-            <span class="text-xs font-bold text-neutral-400 uppercase tracking-wider block mb-2">Parches Colocados</span>
-            <ul id="summary-patches-list" class="space-y-2 text-xs max-h-48 overflow-y-auto pr-1"><li class="text-neutral-400 italic">No has seleccionado ningún parche aún.</li></ul>
+          <!-- ZONAS / SLOTS PARA PARCHES -->
+          <div id="slot-F1" class="patch-slot" onclick="selectSlot('F1')">
+            <span id="label-F1" class="slot-label">F1</span>
+            <img id="img-F1" class="hidden" src="" alt="Parche F1">
+          </div>
+          <div id="slot-F2" class="patch-slot" onclick="selectSlot('F2')">
+            <span id="label-F2" class="slot-label">F2</span>
+            <img id="img-F2" class="hidden" src="" alt="Parche F2">
+          </div>
+          <div id="slot-F3" class="patch-slot" onclick="selectSlot('F3')">
+            <span id="label-F3" class="slot-label">F3</span>
+            <img id="img-F3" class="hidden" src="" alt="Parche F3">
+          </div>
+          <div id="slot-F4" class="patch-slot" onclick="selectSlot('F4')">
+            <span id="label-F4" class="slot-label">F4</span>
+            <img id="img-F4" class="hidden" src="" alt="Parche F4">
+          </div>
+          <div id="slot-L1" class="patch-slot" onclick="selectSlot('L1')">
+            <span id="label-L1" class="slot-label">L1</span>
+            <img id="img-L1" class="hidden" src="" alt="Parche L1">
           </div>
         </div>
+
+        <!-- SELECTOR DE COLOR DE GORRA -->
+        <div class="w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-2xl p-4 mb-6">
+          <label class="block text-center text-xs font-bold uppercase tracking-wider text-neutral-400 mb-3">Color de Gorra Base ($250 MXN)</label>
+          <div class="flex justify-center gap-4">
+            <button onclick="changeCapColor('Navy')" id="btn-navy" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-700 bg-neutral-800 hover:border-neutral-500 transition">
+              <span class="w-4 h-4 rounded-full bg-blue-900 border border-white/20"></span>
+              <span class="text-sm font-medium">Navy</span>
+            </button>
+            <button onclick="changeCapColor('Dune')" id="btn-dune" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-700 bg-neutral-800 hover:border-neutral-500 transition">
+              <span class="w-4 h-4 rounded-full bg-[#d2b48c] border border-white/20"></span>
+              <span class="text-sm font-medium">Dune</span>
+            </button>
+            <button onclick="changeCapColor('Moss')" id="btn-moss" class="flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-terracota bg-neutral-800 transition">
+              <span class="w-4 h-4 rounded-full bg-[#4a5d4e] border border-white/20"></span>
+              <span class="text-sm font-medium">Moss</span>
+            </button>
+          </div>
+        </div>
+
       </div>
 
-      <div class="pt-6 border-t border-neutral-100 mt-6">
-        <div id="promo-tag" class="hidden mb-2 p-2 bg-emerald-50 text-emerald-800 rounded-xl text-[11px] font-bold text-center border border-emerald-200 shadow-inner">🎉 ¡Paquete especial de 6 parches aplicado ($599 MXN)!</div>
-        <div class="flex justify-between items-center mb-4"><span class="text-base font-bold">Total:</span><span id="summary-total" class="text-2xl font-black text-[#C9614F] font-mono">$250 MXN</span></div>
-        <button onclick="openCheckoutModal()" class="w-full py-3 btn-action-primary rounded-2xl font-bold text-sm shadow-md active:scale-[0.98]">Continuar Pedido</button>
+      <!-- COLUMNA DERECHA: RESUMEN Y CHECKOUT (LG: 5 cols) -->
+      <div class="lg:col-span-5 bg-crema text-tinta rounded-3xl p-6 shadow-2xl border border-neutral-200">
+        <h2 class="text-xl font-bold mb-4 pb-2 border-b border-neutral-300 flex justify-between items-center">
+          <span>Resumen de tu Pedido</span>
+          <span class="text-xs bg-petroleo text-crema px-2.5 py-1 rounded-full font-normal">Paso 1 de 2</span>
+        </h2>
+
+        <!-- DESGLOSE DE PRECIOS -->
+        <div class="space-y-3 mb-6">
+          <div class="flex justify-between items-center text-sm">
+            <span class="font-medium text-neutral-700">Gorra Base (<span id="summary-cap-color">Moss</span>):</span>
+            <span class="font-bold">$250 MXN</span>
+          </div>
+          
+          <div class="text-xs font-bold uppercase tracking-wider text-neutral-500 pt-2 border-t border-neutral-200">
+            Parches Colocados (<span id="summary-patch-count">0</span>):
+          </div>
+          
+          <div id="summary-patches-list" class="space-y-1.5 text-sm min-h-[60px]">
+            <p class="text-neutral-400 italic text-xs">Selecciona una posición F1-L1 en la gorra y haz clic en un parche del catálogo para agregarlo.</p>
+          </div>
+
+          <div class="pt-4 border-t-2 border-dashed border-neutral-300 flex justify-between items-end">
+            <div>
+              <span class="block text-xs uppercase font-bold text-neutral-500">Total a Pagar</span>
+              <span class="text-xs text-neutral-400">Impuestos e IVA incluidos</span>
+            </div>
+            <div id="summary-total-price" class="text-3xl font-extrabold text-terracota">
+              $250 MXN
+            </div>
+          </div>
+        </div>
+
+        <!-- FORMULARIO DE CLIENTE -->
+        <div class="space-y-4 pt-4 border-t border-neutral-200">
+          <div>
+            <label class="block text-xs font-bold uppercase text-neutral-600 mb-1">Tu Correo Electrónico *</label>
+            <input type="email" id="cliente-email" required placeholder="tu@email.com" class="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 bg-white text-tinta focus:outline-none focus:ring-2 focus:ring-terracota text-sm">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-neutral-600 mb-1">Método de Entrega</label>
+            <select id="cliente-entrega" class="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 bg-white text-tinta focus:outline-none focus:ring-2 focus:ring-terracota text-sm">
+              <option value="Entrega Local - San Rafael CDMX (Gratis)">Entrega Local - San Rafael CDMX (Gratis)</option>
+              <option value="Envío Nacional a Domicilio (+$99 MXN)">Envío Nacional a Domicilio (+$99 MXN)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-neutral-600 mb-1">Método de Pago</label>
+            <select id="cliente-pago" class="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 bg-white text-tinta focus:outline-none focus:ring-2 focus:ring-terracota text-sm">
+              <option value="SPEI / Transferencia Bancaria">SPEI / Transferencia Bancaria</option>
+              <option value="Mercado Pago">Mercado Pago</option>
+              <option value="PayPal">PayPal</option>
+            </select>
+          </div>
+
+          <!-- BOTÓN DE CONFIRMACIÓN -->
+          <button onclick="procesarPedidoWeb()" id="btn-submit-order" class="w-full py-4 bg-terracota hover:bg-terracota-dark text-white font-bold text-base rounded-2xl shadow-lg transition transform active:scale-95 flex items-center justify-center gap-2 mt-4">
+            <span>Confirmar y Enviar Pedido</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+          </button>
+          
+          <p id="status-msg" class="text-xs text-center font-medium min-h-[18px]"></p>
+        </div>
+
       </div>
-    </section>
+
+    </div>
+
+    <!-- SECCIÓN INFERIOR: CATÁLOGO DE PARCHES -->
+    <div class="mt-12 bg-neutral-900 border border-neutral-800 rounded-3xl p-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 pb-4 border-b border-neutral-800 gap-2">
+        <div>
+          <h3 class="text-xl font-bold text-crema">Catálogo de Parches</h3>
+          <p class="text-xs text-neutral-400">Selecciona una posición activa en la gorra (<span id="active-slot-indicator" class="text-terracota font-bold">F1</span>) y haz clic en el parche para asignarlo.</p>
+        </div>
+        <div class="text-xs bg-neutral-800 px-3 py-1.5 rounded-xl text-neutral-300 border border-neutral-700">
+          Posición actual: <strong id="slot-badge" class="text-terracota">F1 (Frente Izquierda)</strong>
+        </div>
+      </div>
+
+      <!-- GRID DE PARCHES -->
+      <div id="patches-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <!-- Generado dinámicamente con JavaScript -->
+      </div>
+    </div>
   </main>
 
-  <!-- GALERÍA INFERIOR -->
-  <footer class="bg-white border-t border-neutral-200 p-4 sticky bottom-0 z-30 shadow-inner">
-    <div class="max-w-5xl mx-auto">
-      <div class="flex items-center justify-between mb-2"><span class="text-xs font-bold uppercase tracking-wider text-[#423A33]">Catálogo de Parches</span><span id="selected-patch-indicator" class="text-xs font-semibold text-black">Seleccionado: Ninguno</span></div>
-      <div id="patch-gallery" class="flex gap-3 overflow-x-auto pb-2"></div>
-    </div>
-  </footer>
-
-  <!-- MODAL DE CHECKOUT Y PAGO -->
-  <div id="checkout-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[92vh] overflow-y-auto p-6 shadow-2xl flex flex-col gap-6 relative">
-      
-      <!-- Indicador de carga -->
-      <div id="loading-overlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center hidden rounded-3xl">
-          <div class="w-10 h-10 border-4 border-[#C9614F] border-t-transparent rounded-full animate-spin mb-2"></div>
-          <p class="text-xs font-bold text-black" id="loading-text">Procesando pedido...</p>
-      </div>
-
-      <div class="flex items-center justify-between border-b border-neutral-100 pb-3">
-        <div><h3 id="modal-title" class="text-xl font-bold text-black">Tu Correo Electrónico</h3><p id="modal-subtitle" class="text-xs text-neutral-500">Necesario para confirmar tu pedido</p></div>
-        <button onclick="closeCheckoutModal()" class="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 font-bold text-neutral-600 text-sm flex items-center justify-center transition-colors">&times;</button>
-      </div>
-
-      <!-- PASO 1: CORREO ELECTRÓNICO -->
-      <div id="modal-step-email" class="space-y-4">
-        <div class="bg-neutral-50 rounded-2xl p-6 border border-neutral-200 space-y-3">
-            <label for="customer-email" class="text-sm font-bold text-black block">Ingresa tu correo electrónico para continuar:</label>
-            <input type="email" id="customer-email" placeholder="tu@correo.com" required class="w-full text-sm p-3 rounded-xl border border-neutral-300 focus:outline-none focus:border-[#C9614F] transition-colors" />
-        </div>
-        <button onclick="goToPreviewStep()" class="w-full py-3 btn-action-primary text-sm font-bold rounded-xl active:scale-[0.98]">Ver Vista Previa y Pagar &rarr;</button>
-      </div>
-
-      <!-- PASO 2: VISTA PREVIA -->
-      <div id="modal-step-preview" class="hidden space-y-6">
-        <div id="modal-views-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-        
-        <div class="bg-[#CF6F92]/10 border-2 border-[#CF6F92]/30 rounded-2xl p-4 flex items-start gap-3 shadow-inner">
-            <span class="text-2xl mt-1">📷</span>
-            <div>
-                <strong class="text-sm text-[#423A33] block mb-0.5">¡Paso Importante! Antes de pagar:</strong>
-                <p class="text-xs text-[#423A33]/80 leading-relaxed">Tómale un screenshot a estos 4 ángulos de tu diseño final. Nos lo compartirás por Instagram para asegurarnos de crear tu gorra exactamente como la pensaste.</p>
-            </div>
-        </div>
-
-        <div class="bg-neutral-50 rounded-2xl p-4 border border-neutral-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div><span class="text-xs font-bold uppercase text-neutral-400 block">Subtotal Gorra + Parches</span><span id="modal-preview-subtotal" class="text-2xl font-black font-mono text-black">$250 MXN</span></div>
-          <button onclick="goToPaymentStep()" class="w-full sm:w-auto px-6 py-3 btn-action-primary text-sm font-bold rounded-xl active:scale-[0.98]">Ir a Entrega y Pago &rarr;</button>
-        </div>
-      </div>
-
-      <!-- PASO 3: ENTREGA Y PAGO -->
-      <div id="modal-step-payment" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="md:col-span-2 space-y-5">
-          <div class="bg-neutral-50 rounded-2xl p-4 border border-neutral-200 space-y-3">
-            <span class="text-xs font-bold uppercase tracking-wider text-neutral-500 block">1. Método de Entrega</span>
-            
-            <label class="flex items-start gap-3 p-3 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-[#C9614F] transition-colors">
-              <input type="radio" name="delivery-method" value="pickup" checked onchange="toggleDeliveryMethod()" class="mt-1 accent-[#C9614F]" />
-              <div>
-                <span class="text-sm font-bold block text-black">Recoger gratis en local</span>
-                <p class="text-xs text-neutral-500">Manuel María Contreras 59, San Rafael, Cuauhtémoc, CP 06470, CDMX</p>
-              </div>
-            </label>
-
-            <label class="flex items-start gap-3 p-3 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-[#C9614F] transition-colors">
-              <input type="radio" name="delivery-method" value="shipping" onchange="toggleDeliveryMethod()" class="mt-1 accent-[#C9614F]" />
-              <div>
-                <span class="text-sm font-bold block text-black">Envío estándar CDMX ($120 MXN)</span>
-                <p class="text-[11px] text-[#C9614F] font-semibold">Este envío solo aplica dentro de CDMX</p>
-              </div>
-            </label>
-
-            <div id="shipping-address-box" class="hidden space-y-2 pt-2 border-t border-neutral-200">
-              <input type="text" id="ship-street" placeholder="Calle y Número Ext / Int" class="w-full text-xs p-2.5 rounded-xl border border-neutral-300 focus:outline-none focus:border-[#C9614F]" />
-              <div class="grid grid-cols-2 gap-2">
-                <input type="text" id="ship-colony" placeholder="Colonia / Alcaldía" class="text-xs p-2.5 rounded-xl border border-neutral-300 focus:outline-none focus:border-[#C9614F]" />
-                <input type="text" id="ship-cp" placeholder="Código Postal" class="text-xs p-2.5 rounded-xl border border-neutral-300 focus:outline-none focus:border-[#C9614F]" />
-              </div>
-              <input type="text" id="ship-ref" placeholder="Referencias del domicilio (ej. entre calles, color de fachada, etc.)" class="w-full text-xs p-2.5 rounded-xl border border-neutral-300 focus:outline-none focus:border-[#C9614F]" />
-            </div>
-          </div>
-
-          <div class="bg-neutral-50 rounded-2xl p-4 border border-neutral-200 space-y-3">
-            <span class="text-xs font-bold uppercase tracking-wider text-neutral-500 block">2. Método de Pago</span>
-            <div class="grid grid-cols-3 gap-2">
-              <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-[#C9614F] transition-colors"><input type="radio" name="payment-method" value="mercadopago" checked onchange="togglePaymentMethod()" class="accent-[#C9614F]" /><div><span class="text-xs font-bold text-black block">Mercado Pago</span><span class="text-[9px] text-neutral-400">Tarjetas / Deb/Cred</span></div></label>
-              <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-[#C9614F] transition-colors"><input type="radio" name="payment-method" value="paypal" onchange="togglePaymentMethod()" class="accent-[#C9614F]" /><div><span class="text-xs font-bold text-black block">PayPal</span><span class="text-[9px] text-neutral-400">Pago Seguro Real</span></div></label>
-              <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-[#C9614F] transition-colors"><input type="radio" name="payment-method" value="spei" onchange="togglePaymentMethod()" class="accent-[#C9614F]" /><div><span class="text-xs font-bold text-black block">Transferencia</span><span class="text-[9px] text-emerald-600 font-bold">SPEI Directo</span></div></label>
-            </div>
-            <div id="mp-info-box" class="space-y-2 pt-2 border-t border-neutral-200">
-                <p class="text-xs text-neutral-600 leading-relaxed">Serás redirigido a la plataforma oficial de **Mercado Pago** para completar tu pago de forma 100% segura.</p>
-            </div>
-            <div id="paypal-info-box" class="hidden space-y-2 pt-2 border-t border-neutral-200">
-                <p class="text-xs text-neutral-600 leading-relaxed mb-2">Paga directamente con tu cuenta de PayPal o tarjeta vinculada:</p>
-                <div id="paypal-button-container" class="w-full"></div>
-            </div>
-            <div id="spei-info-box" class="hidden p-3 bg-[#F2EDE4] border border-[#C9614F]/30 rounded-xl text-xs text-[#423A33] space-y-1 transition-all duration-300">
-              <span class="font-bold block text-sm mb-1 text-[#423A33]">Datos Santander:</span>
-              <p><strong>Titular:</strong> Brenda Villegas Levy</p><p><strong>CLABE:</strong> 0141 8023 0014 9704 04</p>
-              <p class="text-[11px] text-neutral-600 pt-1.5 border-t border-neutral-100 mt-1.5 leading-relaxed">Al confirmar, te enviaremos un mail de respaldo y se abrirá tu Instagram para adjuntar el comprobante y el screenshot de tu diseño.</p>
-            </div>
-          </div>
-        </div>
-        <div class="bg-neutral-50 rounded-2xl p-4 border border-neutral-200 flex flex-col justify-between">
-          <div><span class="text-xs font-bold uppercase tracking-wider text-neutral-500 block mb-3 border-b border-neutral-200 pb-2">Desglose Final</span>
-            <div class="space-y-2 text-xs">
-              <div class="flex justify-between text-neutral-600"><span>Gorra + Parches:</span><span id="checkout-subtotal" class="font-mono text-black">$250.00</span></div>
-              <div class="flex justify-between text-neutral-600"><span>Envío:</span><span id="checkout-shipping" class="font-mono text-black">$0.00</span></div>
-              <div class="flex justify-between text-neutral-600" id="row-digital-fee"><span>Procesamiento Digital (4%):</span><span id="checkout-fee" class="font-mono text-black">$10.00</span></div>
-              <div class="pt-2 border-t border-neutral-200 flex justify-between font-bold text-sm text-[#423A33]"><span>Total:</span><span id="checkout-total" class="font-mono text-base font-black text-[#C9614F]">$260.00</span></div>
-            </div>
-          </div>
-          <div class="space-y-3 mt-6">
-            <div id="payment-buttons-container" class="space-y-2">
-                <button id="btn-submit-mercadopago" onclick="processMercadoPago()" class="w-full py-3 btn-action-magenta rounded-xl font-bold text-xs shadow-md active:scale-[0.98]">Ir a Pagar con Mercado Pago</button>
-                <button id="btn-submit-spei" onclick="processSPEI()" class="hidden w-full py-3 btn-action-spei rounded-xl font-bold text-xs shadow-md active:scale-[0.98]">Confirmar SPEI y Enviar Mail</button>
-            </div>
-            <button onclick="backToPreviewStep()" class="w-full py-2 bg-neutral-200 hover:bg-neutral-300 text-[#423A33] text-xs font-semibold rounded-xl active:scale-[0.98]">&larr; Volver</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
+  <!-- LÓGICA JAVASCRIPT -->
   <script>
+    // ------------------------------------------------------------------
+    // CONFIGURACIÓN DE APPS SCRIPT Y EMAILJS
+    // ------------------------------------------------------------------
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwryFAUebP9DpcYEW3kDA1Ljx0QZdatiqFISSPfEUuJUqFWXfNBH7A0HEJMD78TiEmMtg/exec";
-    const mp = new MercadoPago('APP_USR-f346a066-5e0f-4886-9041-998816f1837e', { locale: 'es-MX' });
-    const BASE_PRICE = 250; const CDMX_SHIPPING_FEE = 120; const DIGITAL_FEE_RATE = 0.04;
-    let currentColor = 'navy'; let currentViewIndex = 0; let selectedPatch = null; let placedPatches = {}; let currentGrandTotalMXN = 0; let customerEmail = '';
-    let paypalRendered = false;
+    
+    // EmailJS Public Key
+    (function(){
+      if (typeof emailjs !== 'undefined') {
+        emailjs.init("user_X123456789abcdef"); // Tu Public Key de EmailJS
+      }
+    })();
 
-    const CAP_SKUS = {
-      'navy': 'cdmx/navy',
-      'dune': 'mexicocity/dune',
-      'moss': 'mex/moss'
+    // ------------------------------------------------------------------
+    // DATOS DE CATÁLOGO Y ESTADO DE LA TIENDA
+    // ------------------------------------------------------------------
+    const BASE_CAP_PRICE = 250;
+    let selectedCapColor = "Moss";
+    let activeSlot = "F1";
+
+    const capImages = {
+      "Navy": "https://raw.githubusercontent.com/brenvillegaslevy/patchlab/main/assets/caps/navy.png",
+      "Dune": "https://raw.githubusercontent.com/brenvillegaslevy/patchlab/main/assets/caps/dune.png",
+      "Moss": "https://raw.githubusercontent.com/brenvillegaslevy/patchlab/main/assets/caps/moss.png"
     };
 
-    const PATCHES = [ 
-      { id: 'p1', name: 'Elote Preparado', img: 'patches/elote.PNG' }, 
-      { id: 'p2', name: 'Ángel de la Independencia', img: 'patches/angel.PNG' }, 
-      { id: 'p3', name: 'Botas Vaqueras', img: 'patches/botas.PNG' }, 
-      { id: 'p4', name: 'Matcha Latte', img: 'patches/matcha.PNG' }, 
-      { id: 'p5', name: 'Chile de Árbol', img: 'patches/chile.PNG' }, 
-      { id: 'p6', name: 'Máscara de Luchador', img: 'patches/mascara.PNG' }, 
-      { id: 'p7', name: 'Maguey', img: 'patches/agave.PNG' }, 
-      { id: 'p8', name: 'Iced Latte', img: 'patches/iced-coffee.PNG' }, 
-      { id: 'p9', name: 'Bola de Disco', img: 'patches/esfera.PNG' }, 
-      { id: 'p10', name: 'Guacamole', img: 'patches/molcajete.PNG' }, 
-      { id: 'p11', name: 'Ajolote', img: 'patches/ajolote.PNG' }, 
-      { id: 'p12', name: 'Cerveza Corona', img: 'patches/cerveza.PNG' }, 
-      { id: 'p13', name: 'Piñata', img: 'patches/pinata.PNG' }, 
-      { id: 'p14', name: 'Bandera de México', img: 'patches/bandera.PNG' }, 
-      { id: 'p15', name: 'Caguamita', img: 'patches/cahuamita.PNG' }, 
-      { id: 'p16', name: 'Quesadilla', img: 'patches/quesadilla.PNG' }, 
-      { id: 'p17', name: 'Bolillo', img: 'patches/bolillo.PNG' }, 
-      { id: 'p18', name: 'Papel Picado', img: 'patches/papel-picado.PNG' }, 
-      { id: 'p19', name: 'Agua de Jamaica', img: 'patches/agua-jamaica.PNG' }, 
-      { id: 'p20', name: 'Agua de Horchata', img: 'patches/horchata.PNG' } 
+    const patchesCatalog = [
+      { id: "p1", name: "Elote Preparado", price: 70, img: "https://raw.githubusercontent.com/brenvillegaslevy/patchlab/main/assets/patches/elote.png" },
+      { id: "p2", name: "Ajolote CDMX", price: 75, img: "https://raw.githubusercontent.com/brenvillegaslevy/patchlab/main/assets/patches/ajolote.png" },
+      { id: "p3", name: "Quesadilla", price: 70, img: "https://raw.githubusercontent.com/brenvillegaslevy/patchlab/main/assets/patches/quesadilla.png" },
+      { id: "p4", name: "Bolillo", price: 65, img: "https://raw.githubusercontent.com/brenvillegaslevy/patchlab/main/assets/patches/bolillo.png" },
+      { id: "p5", name: "Papel Picado", price: 70, img: "https://raw.githubusercontent.com/brenvillegaslevy/patchlab/main/assets/patches/papel_picado.png" },
+      { id: "p6", name: "Taco al Pastor", price: 75, img: "https://raw.githubusercontent.com/brenvillegaslevy/patchlab/main/assets/patches/taco.png" },
+      { id: "p7", name: "Caguamita", price: 68, img: "https://raw.githubusercontent.com/brenvillegaslevy/patchlab/main/assets/patches/caguama.png" },
+      { id: "p8", name: "Máscara Lucha", price: 75, img: "https://raw.githubusercontent.com/brenvillegaslevy/patchlab/main/assets/patches/lucha.png" },
+      { id: "p9", name: "Topo Chico", price: 70, img: "https://raw.githubusercontent.com/brenvillegaslevy/patchlab/main/assets/patches/topochico.png" },
+      { id: "p10", name: "Nopal Tuna", price: 65, img: "https://raw.githubusercontent.com/brenvillegaslevy/patchlab/main/assets/patches/nopal.png" }
     ];
 
-    const VIEWS = [ { name: 'Frente', angle: 'front', zones: [{ id: 'F1', top: '48%', left: '38%' }, { id: 'F2', top: '48%', left: '62%' }, { id: 'F3', top: '42%', left: '38%' }, { id: 'F4', top: '42%', left: '62%' }]}, { name: 'Lateral Derecho', angle: 'derecho', zones: [{ id: 'D1', top: '60%', left: '24%' }, { id: 'D2', top: '57%', left: '36%' }, { id: 'D3', top: '54%', left: '48%' }, { id: 'D4', top: '48%', left: '26%' }, { id: 'D5', top: '45%', left: '38%' }, { id: 'D6', top: '42%', left: '50%' }]}, { name: 'Atrás', angle: 'atras', zones: [{ id: 'A1', top: '58%', left: '28%' }, { id: 'A2', top: '58%', left: '72%' }, { id: 'A3', top: '48%', left: '34%' }, { id: 'A4', top: '48%', left: '66%' }, { id: 'A5', top: '38%', left: '42%' }, { id: 'A6', top: '38%', left: '58%' }]}, { name: 'Lateral Izquierdo', angle: 'izquierdo', zones: [{ id: 'I1', top: '54%', left: '52%' }, { id: 'I2', top: '57%', left: '64%' }, { id: 'I3', top: '60%', left: '76%' }, { id: 'I4', top: '42%', left: '50%' }, { id: 'I5', top: '45%', left: '62%' }, { id: 'I6', top: '48%', left: '74%' }]} ];
+    // Slots asignados actualmente: { "F1": patchObj, "F2": null, ... }
+    let slotsState = { F1: null, F2: null, F3: null, F4: null, L1: null };
 
-    function handleImgError(img) { if (img.src.endsWith('.PNG')) img.src = img.src.replace('.PNG', '.png'); else if (img.src.endsWith('.png')) img.src = img.src.replace('.png', '.JPG'); else { img.onerror = null; img.src = 'https://placehold.co/300x300?text=Sin+Imagen'; } }
-    window.addEventListener('DOMContentLoaded', () => { renderGallery(); updateRender(); });
-
-    function renderGallery() { const gallery = document.getElementById('patch-gallery'); gallery.innerHTML = ''; PATCHES.forEach(p => { const card = document.createElement('button'); card.className = `flex-shrink-0 w-20 p-2 bg-white rounded-2xl border border-neutral-200 flex flex-col items-center gap-1 transition-all active:scale-95 text-center`; card.id = `patch-card-${p.id}`; card.onclick = () => selectPatch(p); card.innerHTML = `<div class="w-12 h-12 flex items-center justify-center p-1"><img src="${p.img}" alt="${p.name}" class="max-w-full max-h-full object-contain drop-shadow-sm" onError="handleImgError(this)" /></div><span class="text-[10px] font-semibold text-black truncate w-full">${p.name}</span><span class="text-[9px] text-neutral-400 font-mono">$60 / $70</span>`; gallery.appendChild(card); }); }
-    function selectPatch(patch) { selectedPatch = patch; document.getElementById('selected-patch-indicator').innerText = `Seleccionado: ${patch.name}`; PATCHES.forEach(p => { const el = document.getElementById(`patch-card-${p.id}`); if (el) el.classList.remove('ring-2', 'ring-black', 'border-transparent'); }); const activeEl = document.getElementById(`patch-card-${patch.id}`); if (activeEl) activeEl.classList.add('ring-2', 'ring-black', 'border-transparent'); }
-    function assignPatchToZone(zoneId) { if (!selectedPatch) { alert('Por favor, selecciona primero un parche.'); return; } placedPatches[zoneId] = selectedPatch; updateRender(); }
-    function removePatch(zoneId) { delete placedPatches[zoneId]; updateRender(); }
-    function updateRender() { const view = VIEWS[currentViewIndex]; document.getElementById('cap-image').src = `assets/${currentColor}-${view.angle}.PNG`; document.getElementById('view-label').innerText = `VISTA: ${view.name.toUpperCase()}`; const zonesContainer = document.getElementById('zones-overlay'); zonesContainer.innerHTML = ''; view.zones.forEach(zone => { const zoneBtn = document.createElement('button'); const isOccupied = !!placedPatches[zone.id]; const patchInZone = placedPatches[zone.id]; zoneBtn.className = 'zone-btn'; zoneBtn.style.top = zone.top; zoneBtn.style.left = zone.left; if (isOccupied) { zoneBtn.classList.add('occupied'); zoneBtn.innerHTML = `<img src="${patchInZone.img}" alt="${patchInZone.name}" class="w-10 h-10 object-contain drop-shadow-md transition-transform hover:scale-110" onError="handleImgError(this)" /><span class="absolute -top-1 -right-1 bg-black text-white w-4 h-4 rounded-full text-[8px] font-bold flex items-center justify-center shadow-md">&times;</span><span class="absolute -bottom-2 bg-black/80 text-white px-1 rounded text-[7px] font-mono tracking-tighter">${zone.id}</span>`; zoneBtn.onclick = () => removePatch(zone.id); } else { zoneBtn.classList.remove('occupied'); zoneBtn.className += ' border-2 border-dashed border-black/40 bg-white/30 backdrop-blur-[1px] hover:bg-white hover:border-black text-black font-extrabold text-[11px] font-mono shadow-sm hover:scale-105'; zoneBtn.innerText = zone.id; zoneBtn.onclick = () => assignPatchToZone(zone.id); } zonesContainer.appendChild(zoneBtn); }); updateSummary(); }
-    function setColor(color) { currentColor = color.toLowerCase(); document.getElementById('summary-color').innerText = color; ['Navy', 'Dune', 'Moss'].forEach(c => { const btn = document.getElementById(`btn-${c.toLowerCase()}`); btn.className = (c.toLowerCase() === currentColor) ? "flex items-center gap-2 px-4 py-2 bg-black text-white text-xs font-semibold rounded-xl ring-2 ring-black ring-offset-2 transition-all" : "flex items-center gap-2 px-4 py-2 bg-neutral-100 text-black text-xs font-semibold rounded-xl hover:bg-neutral-200 transition-all"; }); updateRender(); }
-    function nextView() { currentViewIndex = (currentViewIndex + 1) % VIEWS.length; updateRender(); }
-    function prevView() { currentViewIndex = (currentViewIndex - 1 + VIEWS.length) % VIEWS.length; updateRender(); }
-    function calculateTotalPrice(count) { if (count === 6) return 599; const pairs = Math.floor(count / 2); const remaining = count % 2; return BASE_PRICE + (pairs * 2 * 60) + (remaining * 70); }
-    function updateSummary() { const placedKeys = Object.keys(placedPatches); const patchesCount = placedKeys.length; const total = calculateTotalPrice(patchesCount); document.getElementById('summary-total').innerText = `$${total} MXN`; document.getElementById('total-price-header').innerText = `Total: $${total} MXN`; document.getElementById('promo-tag').classList.toggle('hidden', patchesCount !== 6); const listContainer = document.getElementById('summary-patches-list'); if (patchesCount === 0) { listContainer.innerHTML = `<li class="text-neutral-400 italic">No has seleccionado ningún parche aún.</li>`; } else { listContainer.innerHTML = ''; placedKeys.forEach((zoneId, index) => { const patch = placedPatches[zoneId]; let priceText = "+$60"; if (patchesCount !== 6 && index === patchesCount - 1 && patchesCount % 2 !== 0) priceText = "+$70"; const li = document.createElement('li'); li.className = 'flex justify-between items-center bg-neutral-50 p-1.5 rounded-lg border border-neutral-100'; li.innerHTML = `<span class="font-medium text-black">[${zoneId}] ${patch.name}</span><span class="font-mono text-neutral-500">${patchesCount === 6 ? 'Incluido' : priceText}</span>`; listContainer.appendChild(li); }); } }
-
-    function openCheckoutModal() { const modal = document.getElementById('checkout-modal'); resetModalStepsUnified(); modal.classList.remove('hidden'); }
-    function closeCheckoutModal() { document.getElementById('checkout-modal').classList.add('hidden'); }
-    
-    function resetModalStepsUnified() {
-        const stepIds = ['modal-step-email', 'modal-step-preview', 'modal-step-payment'];
-        stepIds.forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); });
-        const emailStep = document.getElementById('modal-step-email'); if (emailStep) emailStep.classList.remove('hidden');
-        document.getElementById('modal-title').innerText = "Tu Correo Electrónico";
+    // ------------------------------------------------------------------
+    // FUNCIONES DEL VISUALIZADOR
+    // ------------------------------------------------------------------
+    function init() {
+      renderPatchesCatalog();
+      selectSlot('F1');
+      updateSummary();
     }
 
-    function goToPreviewStep() { const emailInput = document.getElementById('customer-email'); if (!emailInput.checkValidity() || emailInput.value === '') { alert('Ingresa un correo válido.'); return; } customerEmail = emailInput.value; document.getElementById('modal-step-email').classList.add('hidden'); document.getElementById('modal-step-preview').classList.remove('hidden'); document.getElementById('modal-title').innerText = "Vista Final de tu Gorra"; document.getElementById('modal-subtitle').innerText = "Verifica tu diseño y tómale screenshot"; const grid = document.getElementById('modal-views-grid'); const count = Object.keys(placedPatches).length; document.getElementById('modal-preview-subtotal').innerText = `$${calculateTotalPrice(count)} MXN`; grid.innerHTML = ''; VIEWS.forEach(view => { const currentViewPatches = view.zones.filter(z => placedPatches[z.id]); let patchesHTML = ''; currentViewPatches.forEach(z => { const p = placedPatches[z.id]; patchesHTML += `<img src="${p.img}" alt="${p.name}" class="absolute w-12 h-12 object-contain drop-shadow-md" style="top:${z.top}; left:${z.left}; transform: translate(-50%, -50%);" onError="handleImgError(this)" />`; }); const card = document.createElement('div'); card.className = 'bg-neutral-50 rounded-2xl p-4 border border-neutral-200 flex flex-col items-center relative overflow-hidden'; card.innerHTML = `<span class="text-[11px] font-bold text-neutral-400 uppercase self-start mb-2">${view.name}</span><div class="relative w-64 h-64 flex items-center justify-center scale-110 transform transition-transform select-none"><img src="assets/${currentColor}-${view.angle}.PNG" class="w-full h-full object-contain drop-shadow-lg" onError="handleImgError(this)" />${patchesHTML}</div>`; grid.appendChild(card); }); }
-    function goToPaymentStep() { document.getElementById('modal-step-preview').classList.add('hidden'); document.getElementById('modal-step-payment').classList.remove('hidden'); document.getElementById('modal-title').innerText = "Entrega y Pago"; calculateCheckoutTotals(); }
-    function backToPreviewStep() { document.getElementById('modal-step-payment').classList.add('hidden'); document.getElementById('modal-step-preview').classList.remove('hidden'); document.getElementById('modal-title').innerText = "Vista Final"; }
-    function toggleDeliveryMethod() { document.getElementById('shipping-address-box').classList.toggle('hidden', document.querySelector('input[name="delivery-method"]:checked').value !== 'shipping'); calculateCheckoutTotals(); }
-    
-    function togglePaymentMethod() {
-        const selected = document.querySelector('input[name="payment-method"]:checked').value;
-        document.getElementById('mp-info-box').classList.toggle('hidden', selected !== 'mercadopago');
-        document.getElementById('paypal-info-box').classList.toggle('hidden', selected !== 'paypal');
-        document.getElementById('spei-info-box').classList.toggle('hidden', selected !== 'spei');
-        
-        document.getElementById('row-digital-fee').classList.toggle('hidden', selected === 'spei');
-        document.getElementById('btn-submit-mercadopago').classList.toggle('hidden', selected !== 'mercadopago');
-        document.getElementById('btn-submit-spei').classList.toggle('hidden', selected !== 'spei');
+    function changeCapColor(color) {
+      selectedCapColor = color;
+      document.getElementById('cap-image').src = capImages[color];
+      document.getElementById('summary-cap-color').textContent = color;
 
-        if (selected === 'paypal' && !paypalRendered) {
-            renderPayPalButtons();
+      ['navy', 'dune', 'moss'].forEach(c => {
+        const btn = document.getElementById(`btn-${c}`);
+        if (c.toLowerCase() === color.toLowerCase()) {
+          btn.className = "flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-terracota bg-neutral-800 transition";
+        } else {
+          btn.className = "flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-700 bg-neutral-800 hover:border-neutral-500 transition";
         }
-
-        calculateCheckoutTotals();
+      });
     }
 
-    function calculateCheckoutTotals() { 
-        const productSubtotal = calculateTotalPrice(Object.keys(placedPatches).length); 
-        const delivery = document.querySelector('input[name="delivery-method"]:checked').value; 
-        const shipping = (delivery === 'shipping') ? CDMX_SHIPPING_FEE : 0; 
-        const selectedMethod = document.querySelector('input[name="payment-method"]:checked').value;
-        let fee = (selectedMethod !== 'spei') ? (productSubtotal + shipping) * DIGITAL_FEE_RATE : 0; 
-        currentGrandTotalMXN = productSubtotal + shipping + fee; 
-        document.getElementById('checkout-subtotal').innerText = `$${productSubtotal.toFixed(2)}`; 
-        document.getElementById('checkout-shipping').innerText = `$${shipping.toFixed(2)}`; 
-        document.getElementById('checkout-fee').innerText = `$${fee.toFixed(2)}`; 
-        document.getElementById('checkout-total').innerText = `$${currentGrandTotalMXN.toFixed(2)}`; 
+    function selectSlot(slotId) {
+      activeSlot = slotId;
+      document.querySelectorAll('.patch-slot').forEach(el => el.classList.remove('active'));
+      const activeEl = document.getElementById(`slot-${slotId}`);
+      if(activeEl) activeEl.classList.add('active');
+
+      document.getElementById('active-slot-indicator').textContent = slotId;
+      document.getElementById('slot-badge').textContent = `${slotId} (${getSlotName(slotId)})`;
     }
 
-    // --- NOTIFICACIONES CONFIGURADAS (Google Sheets + EmailJS) ---
-    async function enviarNotificaciones(orderData) {
-        // 1. Envío a Google Sheets (Formato URLSearchParams para compatibilidad CORS)
-        try {
-            const formData = new URLSearchParams();
-            formData.append('postData', JSON.stringify(orderData));
+    function getSlotName(slot) {
+      const names = { F1: "Frente Izq", F2: "Frente Centro", F3: "Frente Der", F4: "Lateral Der", L1: "Lateral Izq" };
+      return names[slot] || slot;
+    }
 
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: formData.toString()
-            });
-        } catch (e) { 
-            console.error("Error al enviar a Google Sheets:", e); 
+    function assignPatchToActiveSlot(patchObj) {
+      slotsState[activeSlot] = patchObj;
+      
+      const imgEl = document.getElementById(`img-${activeSlot}`);
+      const labelEl = document.getElementById(`label-${activeSlot}`);
+
+      if (patchObj) {
+        imgEl.src = patchObj.img;
+        imgEl.classList.remove('hidden');
+        labelEl.classList.add('hidden');
+      } else {
+        imgEl.src = "";
+        imgEl.classList.add('hidden');
+        labelEl.classList.remove('hidden');
+      }
+
+      updateSummary();
+    }
+
+    function removePatchFromSlot(slotId) {
+      slotsState[slotId] = null;
+      document.getElementById(`img-${slotId}`).classList.add('hidden');
+      document.getElementById(`label-${slotId}`).classList.remove('hidden');
+      updateSummary();
+    }
+
+    function updateSummary() {
+      let patchesTotal = 0;
+      let count = 0;
+      let listHTML = "";
+
+      Object.keys(slotsState).forEach(slot => {
+        const patch = slotsState[slot];
+        if (patch) {
+          count++;
+          patchesTotal += patch.price;
+          listHTML += `
+            <div class="flex justify-between items-center bg-white/60 px-2.5 py-1.5 rounded-lg border border-neutral-200">
+              <span class="text-xs font-semibold text-neutral-800">[${slot}] ${patch.name}</span>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-terracota">+$${patch.price} MXN</span>
+                <button onclick="removePatchFromSlot('${slot}')" class="text-neutral-400 hover:text-red-600 font-bold text-xs">✕</button>
+              </div>
+            </div>
+          `;
         }
+      });
 
-        // 2. Envío de Correo vía EmailJS
-        try {
-            const templateParams = {
-                reply_to: orderData.email,
-                metodo_pago: orderData.metodo_pago,
-                color_gorra: orderData.color_gorra,
-                parches: orderData.parches,
-                entrega: orderData.entrega,
-                total: orderData.total
-            };
+      if (count === 0) {
+        listHTML = `<p class="text-neutral-400 italic text-xs">Selecciona una posición (F1-L1) y haz clic en un parche para colocarlo.</p>`;
+      }
 
-            await emailjs.send('service_y9rnzpe', 'template_ecmzkr8', templateParams);
-            console.log("Correo enviado exitosamente vía EmailJS");
-        } catch (e) { 
-            console.error("Error al enviar correo con EmailJS:", e); 
+      const totalGrand = BASE_CAP_PRICE + patchesTotal;
+
+      document.getElementById('summary-patch-count').textContent = count;
+      document.getElementById('summary-patches-list').innerHTML = listHTML;
+      document.getElementById('summary-total-price').textContent = `$${totalGrand} MXN`;
+      document.getElementById('top-total-badge').innerHTML = `Total: <span class="text-terracota font-bold">$${totalGrand} MXN</span>`;
+    }
+
+    function renderPatchesCatalog() {
+      const grid = document.getElementById('patches-grid');
+      grid.innerHTML = "";
+
+      patchesCatalog.forEach(patch => {
+        const card = document.createElement('div');
+        card.className = "bg-neutral-800 border border-neutral-700 hover:border-terracota rounded-2xl p-3 flex flex-col items-center cursor-pointer transition transform hover:-translate-y-1";
+        card.onclick = () => assignPatchToActiveSlot(patch);
+
+        card.innerHTML = `
+          <div class="w-16 h-16 flex items-center justify-center mb-2">
+            <img src="${patch.img}" alt="${patch.name}" class="max-w-full max-h-full object-contain filter drop-shadow">
+          </div>
+          <span class="text-xs font-bold text-crema text-center line-clamp-1">${patch.name}</span>
+          <span class="text-[11px] font-semibold text-terracota mt-0.5">+$${patch.price} MXN</span>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // ------------------------------------------------------------------
+    // PROCESAMIENTO DE COMPRA / ENVÍO DE DATOS
+    // ------------------------------------------------------------------
+    function procesarPedidoWeb() {
+      const emailInput = document.getElementById('cliente-email').value.trim();
+      const entregaVal = document.getElementById('cliente-entrega').value;
+      const pagoVal = document.getElementById('cliente-pago').value;
+      const btn = document.getElementById('btn-submit-order');
+      const statusMsg = document.getElementById('status-msg');
+
+      if (!emailInput || !emailInput.includes('@')) {
+        alert("Por favor ingresa un correo electrónico válido para registrar tu pedido.");
+        document.getElementById('cliente-email').focus();
+        return;
+      }
+
+      // Preparar lista de parches
+      let parchesNombres = [];
+      Object.keys(slotsState).forEach(slot => {
+        if (slotsState[slot]) {
+          parchesNombres.push(`${slotsState[slot].name} (${slot})`);
         }
-    }
+      });
+      const parchesTexto = parchesNombres.length > 0 ? parchesNombres.join(", ") : "Ninguno";
 
-    // --- PROCESOS DE PAGO ---
+      // Calcular Total
+      let patchesTotal = 0;
+      Object.keys(slotsState).forEach(slot => {
+        if (slotsState[slot]) patchesTotal += slotsState[slot].price;
+      });
+      const totalCalculado = `$${BASE_CAP_PRICE + patchesTotal}.00 MXN`;
 
-    // 1. Mercado Pago
-    function processMercadoPago() {
-        const address = getFullAddress(); 
-        if (!address) return;
+      // Bloquear botón para evitar doble clic
+      btn.disabled = true;
+      btn.classList.add('opacity-50', 'cursor-not-allowed');
+      statusMsg.className = "text-xs text-center font-medium text-neutral-600";
+      statusMsg.textContent = "Guardando pedido en el sistema...";
 
-        const orderData = getOrderData('Mercado Pago', address);
-        localStorage.setItem('pendingOrder', JSON.stringify(orderData));
+      // DATOS PARA APPS SCRIPT (GOOGLE SHEETS)
+      const datosPedido = {
+        email: emailInput,
+        metodo_pago: pagoVal,
+        color_gorra: `cdmx/${selectedCapColor.toLowerCase()}`,
+        parches: parchesTexto,
+        entrega: entregaVal,
+        total: totalCalculado
+      };
 
-        alert(`Serás redirigido a Mercado Pago para procesar $${currentGrandTotalMXN.toFixed(2)} MXN.`);
-        window.location.href = "https://www.mercadopago.com.mx/"; 
-    }
+      // 1. REGISTRAR EN GOOGLE SHEETS DE FORMA TRANSPARENTE
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors", // Evita bloqueos de CORS
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({ postData: JSON.stringify(datosPedido) })
+      })
+      .then(() => {
+        console.log("¡Éxito! Pedido enviado correctamente a Google Sheets.");
+      })
+      .catch(err => {
+        console.error("Error al guardar en Google Sheets:", err);
+      });
 
-    // 2. PayPal
-    function renderPayPalButtons() {
-        if (typeof paypal === 'undefined') return;
-        paypalRendered = true;
+      // 2. INTENTAR ENVIAR CORREO CON EMAILJS (PROTEGIDO)
+      const templateParams = {
+        to_email: emailInput,
+        user_email: emailInput,
+        email: emailInput,
+        reply_to: emailInput,
+        metodo_pago: pagoVal,
+        color_gorra: selectedCapColor,
+        parches: parchesTexto,
+        entrega: entregaVal,
+        total: totalCalculado
+      };
+
+      if (typeof emailjs !== 'undefined') {
+        emailjs.send("service_x12345", "template_x12345", templateParams)
+          .then(res => console.log("EmailJS OK:", res.status))
+          .catch(err => console.warn("EmailJS no enviado (no afecta registro en Sheets):", err));
+      }
+
+      // 3. REDIRIGIR A INSTAGRAM TRAS CULMINAR
+      setTimeout(() => {
+        statusMsg.className = "text-xs text-center font-bold text-green-700";
+        statusMsg.textContent = "¡Pedido registrado! Redirigiendo al chat de Instagram...";
         
-        paypal.Buttons({
-            createOrder: function(data, actions) {
-                const address = getFullAddress();
-                if (!address) return;
-                
-                return actions.order.create({
-                    purchase_units: [{
-                        description: `Gorra patch lab mx ★ - ${currentColor.toUpperCase()}`,
-                        amount: {
-                            currency_code: 'MXN',
-                            value: currentGrandTotalMXN.toFixed(2)
-                        }
-                    }]
-                });
-            },
-            onApprove: async function(data, actions) {
-                document.getElementById('loading-text').innerText = 'Procesando pago, registrando pedido y enviando correo...';
-                document.getElementById('loading-overlay').classList.remove('hidden');
-                
-                const details = await actions.order.capture();
-                const address = getFullAddress() || "Entrega local";
-                const orderData = getOrderData('PayPal', address);
-                
-                await enviarNotificaciones(orderData);
-                
-                document.getElementById('loading-overlay').classList.add('hidden');
-                alert(`¡Pago exitoso completado por ${details.payer.name.given_name}!`);
-                
-                const message = `¡Hola patch lab mx ★! 👋 Acabo de pagar por PayPal:\n\n✉️ *Correo:* ${orderData.email}\n🧢 *Gorra:* ${orderData.color_gorra}\n📍 *Parches:* ${orderData.parches}\n🚚 *Entrega:* ${orderData.entrega}\n💰 *Total:* ${orderData.total}\n\nAdjunto screenshot de mi diseño.`;
-                window.open(`https://ig.me/m/patc.hlabmx?text=${encodeURIComponent(message)}`, '_blank');
-                closeCheckoutModal();
-            },
-            onError: function(err) {
-                console.error('Error en PayPal:', err);
-                alert('Ocurrió un problema con PayPal. Verifica tus datos o intenta con otro método.');
-            }
-        }).render('#paypal-button-container');
-    }
-
-    // 3. SPEI
-    async function processSPEI() {
-        const address = getFullAddress(); if (!address) return;
-        document.getElementById('loading-text').innerText = 'Registrando pedido y enviando correo...';
-        document.getElementById('loading-overlay').classList.remove('hidden');
+        const mensajeIG = encodeURIComponent(`¡Hola! Acabo de hacer un pedido en la web:\n- Gorra: ${selectedCapColor}\n- Parches: ${parchesTexto}\n- Total: ${totalCalculado}\n- Correo: ${emailInput}`);
         
-        const data = getOrderData('SPEI / Transferencia', address);
-
-        await enviarNotificaciones(data);
-
-        document.getElementById('loading-overlay').classList.add('hidden');
-        const message = `¡Hola patch lab mx ★! 👋 Confirmo pedido SPEI:\n\n✉️ *Correo:* ${data.email}\n🧢 *Gorra:* ${data.color_gorra}\n📍 *Parches:* ${data.parches}\n🚚 *Entrega:* ${data.entrega}\n💰 *Total:* ${data.total}\n\n---------------------------\nAdjunto comprobante Santander y screenshot del diseño.`;
-        window.open(`https://ig.me/m/patc.hlabmx?text=${encodeURIComponent(message)}`, '_blank');
-        closeCheckoutModal();
+        window.location.href = `https://ig.me/m/patc.hlabmx?text=${mensajeIG}`;
+      }, 1200);
     }
 
-    function getFullAddress() { 
-        if (document.querySelector('input[name="delivery-method"]:checked').value === 'shipping') { 
-            const street = document.getElementById('ship-street').value.trim(); 
-            const colony = document.getElementById('ship-colony').value.trim(); 
-            const cp = document.getElementById('ship-cp').value.trim(); 
-            const ref = document.getElementById('ship-ref').value.trim();
-            if (!street || !colony || !cp) { alert('Completa la dirección estándar en CDMX.'); return null; } 
-            return `${street}, Col. ${colony}, CP ${cp}, CDMX${ref ? ` (Ref: ${ref})` : ''}`; 
-        } 
-        return "Entrega local: Manuel María Contreras 59, San Rafael, Cuauhtémoc, CP 06470, CDMX"; 
-    }
-
-    function getOrderData(method, address) { 
-        const rawPatchesList = Object.values(placedPatches).map(p => p.name);
-        const parchesTexto = rawPatchesList.length > 0 ? rawPatchesList.join(', ') : 'Ninguno';
-
-        return { 
-            _subject: `Nuevo Pedido ${method} - ${currentGrandTotalMXN.toFixed(2)}`, 
-            email: customerEmail, 
-            metodo_pago: method, 
-            color_gorra: CAP_SKUS[currentColor] || currentColor, 
-            parches: parchesTexto, 
-            entrega: address, 
-            total: `$${currentGrandTotalMXN.toFixed(2)}` 
-        }; 
-    }
+    // Inicializar al cargar la página
+    window.onload = init;
   </script>
 </body>
 </html>
