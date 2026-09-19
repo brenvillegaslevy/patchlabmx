@@ -218,17 +218,39 @@
           <div class="bg-neutral-50 rounded-2xl p-4 border border-neutral-200 space-y-3">
             <span class="text-xs font-bold uppercase tracking-wider text-neutral-500 block">2. Método de Pago</span>
             <div class="grid grid-cols-3 gap-2">
-              <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-[#C9614F] transition-colors"><input type="radio" name="payment-method" value="mercadopago" checked onchange="togglePaymentMethod()" class="accent-[#C9614F]" /><div><span class="text-xs font-bold text-black block">Mercado Pago</span><span class="text-[9px] text-neutral-400">Tarjetas / Deb/Cred</span></div></label>
-              <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-[#C9614F] transition-colors"><input type="radio" name="payment-method" value="paypal" onchange="togglePaymentMethod()" class="accent-[#C9614F]" /><div><span class="text-xs font-bold text-black block">PayPal</span><span class="text-[9px] text-neutral-400">Pago Seguro Real</span></div></label>
-              <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-[#C9614F] transition-colors"><input type="radio" name="payment-method" value="spei" onchange="togglePaymentMethod()" class="accent-[#C9614F]" /><div><span class="text-xs font-bold text-black block">Transferencia</span><span class="text-[9px] text-emerald-600 font-bold">SPEI Directo</span></div></label>
+              <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-[#C9614F] transition-colors">
+                <input type="radio" name="payment-method" value="mercadopago" checked onchange="togglePaymentMethod()" class="accent-[#C9614F]" />
+                <div>
+                  <span class="text-xs font-bold text-black block">Link Mercado Pago</span>
+                  <span class="text-[9px] text-neutral-400">Enlace directo a tu IG</span>
+                </div>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-[#C9614F] transition-colors">
+                <input type="radio" name="payment-method" value="paypal" onchange="togglePaymentMethod()" class="accent-[#C9614F]" />
+                <div>
+                  <span class="text-xs font-bold text-black block">PayPal / Tarjeta</span>
+                  <span class="text-[9px] text-neutral-400">Pago Directo en Web</span>
+                </div>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-[#C9614F] transition-colors">
+                <input type="radio" name="payment-method" value="spei" onchange="togglePaymentMethod()" class="accent-[#C9614F]" />
+                <div>
+                  <span class="text-xs font-bold text-black block">Transferencia</span>
+                  <span class="text-[9px] text-emerald-600 font-bold">SPEI Directo</span>
+                </div>
+              </label>
             </div>
-            <div id="mp-info-box" class="space-y-2 pt-2 border-t border-neutral-200">
-                <p class="text-xs text-neutral-600 leading-relaxed">Serás redirigido a la plataforma oficial de **Mercado Pago** para completar tu pago de forma 100% segura.</p>
+
+            <div id="mp-info-box" class="p-3 bg-[#F2EDE4] border border-[#CF6F92]/40 rounded-xl text-xs text-[#423A33] space-y-1 transition-all duration-300">
+              <span class="font-bold block text-sm mb-1 text-[#423A33]">🔗 Solicitud de Link de Pago Mercado Pago:</span>
+              <p class="leading-relaxed">Al confirmar tu pedido, guardaremos tu diseño y te redirigiremos a nuestro Instagram. <strong>Te enviaremos ahí tu link de pago personalizado de Mercado Pago</strong> para que puedas pagar con tarjeta de crédito/débito o dinero en cuenta en un solo clic.</p>
             </div>
+
             <div id="paypal-info-box" class="hidden space-y-2 pt-2 border-t border-neutral-200">
-                <p class="text-xs text-neutral-600 leading-relaxed mb-2">Paga directamente con tu cuenta de PayPal o tarjeta vinculada:</p>
+                <p class="text-xs text-neutral-600 leading-relaxed mb-2">Paga directamente con tu cuenta de PayPal o ingresa los datos de tu tarjeta de crédito/débito abajo:</p>
                 <div id="paypal-button-container" class="w-full"></div>
             </div>
+
             <div id="spei-info-box" class="hidden p-3 bg-[#F2EDE4] border border-[#C9614F]/30 rounded-xl text-xs text-[#423A33] space-y-1 transition-all duration-300">
               <span class="font-bold block text-sm mb-1 text-[#423A33]">Datos Santander:</span>
               <p><strong>Titular:</strong> Brenda Villegas Levy</p><p><strong>CLABE:</strong> 0141 8023 0014 9704 04</p>
@@ -247,19 +269,26 @@
           </div>
           <div class="space-y-3 mt-6">
             <div id="payment-buttons-container" class="space-y-2">
-                <button id="btn-submit-mercadopago" onclick="processMercadoPago()" class="w-full py-3 btn-action-magenta rounded-xl font-bold text-xs shadow-md active:scale-[0.98]">Ir a Pagar con Mercado Pago</button>
+                <button id="btn-submit-mercadopago" onclick="processMercadoPago()" class="w-full py-3 btn-action-magenta rounded-xl font-bold text-xs shadow-md active:scale-[0.98]">Generar Pedido y Solicitar Link MP</button>
                 <button id="btn-submit-spei" onclick="processSPEI()" class="hidden w-full py-3 btn-action-spei rounded-xl font-bold text-xs shadow-md active:scale-[0.98]">Confirmar SPEI y Enviar Mail</button>
             </div>
             <button onclick="backToPreviewStep()" class="w-full py-2 bg-neutral-200 hover:bg-neutral-300 text-[#423A33] text-xs font-semibold rounded-xl active:scale-[0.98]">&larr; Volver</button>
           </div>
         </div>
       </div>
+
+      <!-- PASO 4: VENTANA DE CONFIRMACIÓN DE PEDIDO COMPLETADO -->
+      <div id="modal-step-success" class="hidden text-center space-y-4 py-8">
+        <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-4xl font-bold shadow-sm">✓</div>
+        <h3 class="text-2xl font-black text-black">¡Pedido Confirmado!</h3>
+        <p class="text-xs text-neutral-600 leading-relaxed max-w-md mx-auto">Tu pedido ha sido registrado con éxito en nuestro inventario y te hemos enviado una copia a tu correo electrónico.<br><br><strong class="text-black">Redirigiendo al chat de Instagram de patch lab mx ★...</strong></p>
+      </div>
+
     </div>
   </div>
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwryFAUebP9DpcYEW3kDA1Ljx0QZdatiqFISSPfEUuJUqFWXfNBH7A0HEJMD78TiEmMtg/exec";
-    const mp = new MercadoPago('APP_USR-f346a066-5e0f-4886-9041-998816f1837e', { locale: 'es-MX' });
     const BASE_PRICE = 250; const CDMX_SHIPPING_FEE = 120; const DIGITAL_FEE_RATE = 0.04;
     let currentColor = 'navy'; let currentViewIndex = 0; let selectedPatch = null; let placedPatches = {}; let currentGrandTotalMXN = 0; let customerEmail = '';
     let paypalRendered = false;
@@ -313,10 +342,11 @@
     function closeCheckoutModal() { document.getElementById('checkout-modal').classList.add('hidden'); }
     
     function resetModalStepsUnified() {
-        const stepIds = ['modal-step-email', 'modal-step-preview', 'modal-step-payment'];
+        const stepIds = ['modal-step-email', 'modal-step-preview', 'modal-step-payment', 'modal-step-success'];
         stepIds.forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); });
         const emailStep = document.getElementById('modal-step-email'); if (emailStep) emailStep.classList.remove('hidden');
         document.getElementById('modal-title').innerText = "Tu Correo Electrónico";
+        document.getElementById('modal-subtitle').innerText = "Necesario para confirmar tu pedido";
     }
 
     function goToPreviewStep() { const emailInput = document.getElementById('customer-email'); if (!emailInput.checkValidity() || emailInput.value === '') { alert('Ingresa un correo válido.'); return; } customerEmail = emailInput.value; document.getElementById('modal-step-email').classList.add('hidden'); document.getElementById('modal-step-preview').classList.remove('hidden'); document.getElementById('modal-title').innerText = "Vista Final de tu Gorra"; document.getElementById('modal-subtitle').innerText = "Verifica tu diseño y tómale screenshot"; const grid = document.getElementById('modal-views-grid'); const count = Object.keys(placedPatches).length; document.getElementById('modal-preview-subtotal').innerText = `$${calculateTotalPrice(count)} MXN`; grid.innerHTML = ''; VIEWS.forEach(view => { const currentViewPatches = view.zones.filter(z => placedPatches[z.id]); let patchesHTML = ''; currentViewPatches.forEach(z => { const p = placedPatches[z.id]; patchesHTML += `<img src="${p.img}" alt="${p.name}" class="absolute w-12 h-12 object-contain drop-shadow-md" style="top:${z.top}; left:${z.left}; transform: translate(-50%, -50%);" onError="handleImgError(this)" />`; }); const card = document.createElement('div'); card.className = 'bg-neutral-50 rounded-2xl p-4 border border-neutral-200 flex flex-col items-center relative overflow-hidden'; card.innerHTML = `<span class="text-[11px] font-bold text-neutral-400 uppercase self-start mb-2">${view.name}</span><div class="relative w-64 h-64 flex items-center justify-center scale-110 transform transition-transform select-none"><img src="assets/${currentColor}-${view.angle}.PNG" class="w-full h-full object-contain drop-shadow-lg" onError="handleImgError(this)" />${patchesHTML}</div>`; grid.appendChild(card); }); }
@@ -356,7 +386,7 @@
 
     // --- NOTIFICACIONES CONFIGURADAS (Google Sheets + EmailJS) ---
     async function enviarNotificaciones(orderData) {
-        // 1. Envío a Google Sheets (URLSearchParams sin bloqueo CORS)
+        // 1. Envío a Google Sheets
         try {
             const formData = new URLSearchParams();
             formData.append('postData', JSON.stringify(orderData));
@@ -367,18 +397,18 @@
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: formData.toString()
             });
-            console.log("Datos enviados a Google Sheets correctamente.");
+            console.log("Pedido guardado en Google Sheets correctamente.");
         } catch (e) { 
             console.error("Error al enviar a Google Sheets:", e); 
         }
 
-        // 2. Envío de Correo vía EmailJS (Con manejo de parámetros y fallbacks)
+        // 2. Envío de Correo vía EmailJS
         try {
             const templateParams = {
-                to_email: orderData.email,
-                user_email: orderData.email,
-                reply_to: orderData.email,
-                email: orderData.email,
+                to_email: orderData.email || customerEmail,
+                user_email: orderData.email || customerEmail,
+                reply_to: orderData.email || customerEmail,
+                email: orderData.email || customerEmail,
                 metodo_pago: orderData.metodo_pago,
                 color_gorra: orderData.color_gorra,
                 parches: orderData.parches,
@@ -389,27 +419,43 @@
             await emailjs.send('service_y9rnzpe', 'template_ecmzkr8', templateParams);
             console.log("Correo enviado exitosamente vía EmailJS");
         } catch (e) { 
-            console.warn("Aviso EmailJS (no detiene la compra):", e); 
+            console.warn("Aviso EmailJS:", e); 
         }
+    }
+
+    // --- MUESTRA PANTALLA DE CONFIRMACIÓN Y REDIRIGE A INSTAGRAM ---
+    function mostrarVentanaExitoYRedirigir(mensajeIG) {
+        document.getElementById('modal-step-payment').classList.add('hidden');
+        document.getElementById('modal-step-success').classList.remove('hidden');
+        document.getElementById('modal-title').innerText = "¡Pedido Confirmado!";
+        document.getElementById('modal-subtitle').innerText = "Gracias por tu compra";
+
+        setTimeout(() => {
+            window.open(`https://ig.me/m/patc.hlabmx?text=${encodeURIComponent(mensajeIG)}`, '_blank');
+        }, 2500);
     }
 
     // --- PROCESOS DE PAGO ---
 
-    // 1. Mercado Pago
-    function processMercadoPago() {
-        const address = getFullAddress(); 
-        if (!address) return;
+    // 1. Mercado Pago (Solicitud de Link)
+    async function processMercadoPago() {
+        const address = getFullAddress(); if (!address) return;
+        document.getElementById('loading-text').innerText = 'Registrando pedido y preparando solicitud de link...';
+        document.getElementById('loading-overlay').classList.remove('hidden');
 
-        const orderData = getOrderData('Mercado Pago', address);
-        localStorage.setItem('pendingOrder', JSON.stringify(orderData));
+        const data = getOrderData('Link de Pago Mercado Pago', address);
 
-        enviarNotificaciones(orderData);
+        // Guardar en Google Sheets y enviar correo
+        await enviarNotificaciones(data);
 
-        alert(`Serás redirigido a Mercado Pago para procesar $${currentGrandTotalMXN.toFixed(2)} MXN.`);
-        window.location.href = "https://www.mercadopago.com.mx/"; 
+        document.getElementById('loading-overlay').classList.add('hidden');
+        
+        const message = `¡Hola patch lab mx ★! 👋 Acabo de levantar mi pedido para pago con Mercado Pago:\n\n✉️ *Correo:* ${data.email}\n🧢 *Gorra:* ${data.color_gorra}\n📍 *Parches:* ${data.parches}\n🚚 *Entrega:* ${data.entrega}\n💰 *Total:* ${data.total}\n\n---------------------------\nMe apoyas enviándome el link de pago de Mercado Pago por favor. Adjunto screenshot de mi diseño.`;
+
+        mostrarVentanaExitoYRedirigir(message);
     }
 
-    // 2. PayPal
+    // 2. PayPal / Tarjeta Directa
     function renderPayPalButtons() {
         if (typeof paypal === 'undefined') return;
         paypalRendered = true;
@@ -438,17 +484,14 @@
                 const orderData = getOrderData('PayPal', address);
                 
                 await enviarNotificaciones(orderData);
-                
                 document.getElementById('loading-overlay').classList.add('hidden');
-                alert(`¡Pago exitoso completado por ${details.payer.name.given_name}!`);
-                
+
                 const message = `¡Hola patch lab mx ★! 👋 Acabo de pagar por PayPal:\n\n✉️ *Correo:* ${orderData.email}\n🧢 *Gorra:* ${orderData.color_gorra}\n📍 *Parches:* ${orderData.parches}\n🚚 *Entrega:* ${orderData.entrega}\n💰 *Total:* ${orderData.total}\n\nAdjunto screenshot de mi diseño.`;
-                window.open(`https://ig.me/m/patc.hlabmx?text=${encodeURIComponent(message)}`, '_blank');
-                closeCheckoutModal();
+                mostrarVentanaExitoYRedirigir(message);
             },
             onError: function(err) {
                 console.error('Error en PayPal:', err);
-                alert('Ocurrió un problema con PayPal. Verifica tus datos o intenta con otro método.');
+                alert('Ocurrió un problema con PayPal. Intenta de nuevo.');
             }
         }).render('#paypal-button-container');
     }
@@ -465,8 +508,8 @@
 
         document.getElementById('loading-overlay').classList.add('hidden');
         const message = `¡Hola patch lab mx ★! 👋 Confirmo pedido SPEI:\n\n✉️ *Correo:* ${data.email}\n🧢 *Gorra:* ${data.color_gorra}\n📍 *Parches:* ${data.parches}\n🚚 *Entrega:* ${data.entrega}\n💰 *Total:* ${data.total}\n\n---------------------------\nAdjunto comprobante Santander y screenshot del diseño.`;
-        window.open(`https://ig.me/m/patc.hlabmx?text=${encodeURIComponent(message)}`, '_blank');
-        closeCheckoutModal();
+        
+        mostrarVentanaExitoYRedirigir(message);
     }
 
     function getFullAddress() { 
