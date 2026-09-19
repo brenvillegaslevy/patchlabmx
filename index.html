@@ -427,9 +427,10 @@
         document.getElementById('modal-title').innerText = "¡Pedido Confirmado!";
         document.getElementById('modal-subtitle').innerText = "Gracias por tu compra";
 
+        // Redirección directa en la misma pestaña tras 1.5 segundos
         setTimeout(() => {
-            window.open(`https://ig.me/m/patc.hlabmx?text=${encodeURIComponent(mensajeIG)}`, '_blank');
-        }, 2500);
+            window.location.href = `https://ig.me/m/patc.hlabmx?text=${encodeURIComponent(mensajeIG)}`;
+        }, 1500);
     }
 
     // --- PROCESOS DE PAGO ---
