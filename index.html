@@ -201,7 +201,7 @@
               <input type="radio" name="delivery-method" value="shipping" onchange="toggleDeliveryMethod()" class="mt-1 accent-[#C9614F]" />
               <div>
                 <span class="text-sm font-bold block text-black">Envío estándar CDMX ($120 MXN)</span>
-                <p class="text-[11px] text-[#C9614F] font-semibold">Este envío solo aplica dentro de CDMX</p>
+                <p class="text-[11px] text-[#C9614F] font-semibold leading-snug">Este envío solo aplica dentro de CDMX <span class="font-normal text-neutral-600 block sm:inline">(En caso de requerir envío nacional o internacional, favor de cotizarlo directamente con nosotros)</span></p>
               </div>
             </label>
 
@@ -386,7 +386,6 @@
 
     // --- NOTIFICACIONES CONFIGURADAS (Google Sheets + EmailJS) ---
     async function enviarNotificaciones(orderData) {
-        // 1. Envío a Google Sheets
         try {
             const formData = new URLSearchParams();
             formData.append('postData', JSON.stringify(orderData));
@@ -402,7 +401,6 @@
             console.error("Error al enviar a Google Sheets:", e); 
         }
 
-        // 2. Envío de Correo vía EmailJS
         try {
             const templateParams = {
                 to_email: orderData.email || customerEmail,
@@ -423,7 +421,6 @@
         }
     }
 
-    // --- MUESTRA PANTALLA DE CONFIRMACIÓN Y REDIRIGE A INSTAGRAM ---
     function mostrarVentanaExitoYRedirigir(mensajeIG) {
         document.getElementById('modal-step-payment').classList.add('hidden');
         document.getElementById('modal-step-success').classList.remove('hidden');
@@ -437,7 +434,6 @@
 
     // --- PROCESOS DE PAGO ---
 
-    // 1. Mercado Pago (Solicitud de Link)
     async function processMercadoPago() {
         const address = getFullAddress(); if (!address) return;
         document.getElementById('loading-text').innerText = 'Registrando pedido y preparando solicitud de link...';
@@ -445,7 +441,6 @@
 
         const data = getOrderData('Link de Pago Mercado Pago', address);
 
-        // Guardar en Google Sheets y enviar correo
         await enviarNotificaciones(data);
 
         document.getElementById('loading-overlay').classList.add('hidden');
@@ -455,7 +450,6 @@
         mostrarVentanaExitoYRedirigir(message);
     }
 
-    // 2. PayPal / Tarjeta Directa
     function renderPayPalButtons() {
         if (typeof paypal === 'undefined') return;
         paypalRendered = true;
@@ -496,7 +490,6 @@
         }).render('#paypal-button-container');
     }
 
-    // 3. SPEI
     async function processSPEI() {
         const address = getFullAddress(); if (!address) return;
         document.getElementById('loading-text').innerText = 'Registrando pedido y enviando correo...';
